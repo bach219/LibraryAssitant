@@ -21,6 +21,8 @@ import library.assistant.alert.AlertMaker;
 import library.assistant.data.model.Member;
 import library.assistant.database.DataHelper;
 import library.assistant.database.DatabaseHandler;
+import library.assistant.ui.main.MainController;
+import library.assistant.util.LibraryAssistantUtil;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -39,8 +41,8 @@ public class EmployeeAddController implements Initializable {
     private JFXTextField name;
     @FXML
     private JFXPasswordField password;
-    @FXML
-    private JFXTextField id;
+//    @FXML
+//    private JFXTextField id;
     @FXML
     private JFXTextField mobile;
     @FXML
@@ -53,6 +55,8 @@ public class EmployeeAddController implements Initializable {
     private Boolean isInEditMode = false;
 
     DatabaseHandler handler;
+    
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         handler = DatabaseHandler.getInstance();
@@ -61,12 +65,12 @@ public class EmployeeAddController implements Initializable {
     @FXML
     private void addEmployee(ActionEvent event) {
         String mName = StringUtils.trimToEmpty(name.getText());
-        String mID = StringUtils.trimToEmpty(id.getText());
+//        String mID = StringUtils.trimToEmpty(id.getText());
         String mMobile = StringUtils.trimToEmpty(mobile.getText());
         String mEmail = StringUtils.trimToEmpty(email.getText());
         String pword = DigestUtils.shaHex(password.getText());
 
-        Boolean flag = mName.isEmpty() || mID.isEmpty() || mMobile.isEmpty() || mEmail.isEmpty() || password.getText().isEmpty();
+        Boolean flag = mName.isEmpty() /* || mMobile.isEmpty()*/ || mEmail.isEmpty() || password.getText().isEmpty();
         if (flag) {
             AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "Insufficient Data", "Please enter data in all fields.");
             return;
@@ -77,17 +81,24 @@ public class EmployeeAddController implements Initializable {
             return;
         }
 
-        if (DataHelper.isMemberExists(mID)) {
-            AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "Duplicate member id", "Member with same id exists.\nPlease use new ID");
+        Member member = DataHelper.getMemberByEmail(mEmail);
+        if (member != null) {
+            AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "Duplicate member email", "Member with same id exists.\nPlease use new Email");
             return;
         }
+//        if(LibraryAssistantUtil.validateEmailAddress(mEmail)){
+//            AlertMaker.showErrorMessage("Failed", "Failed to parse email format");
+//            return;
+//        }
 
-        Member member = new Member(mID, mName, mMobile, mEmail);
+        member = new Member(mName, mMobile, mEmail);
         member.setPosition(2);
         member.setPassword(pword);
         boolean result = DataHelper.insertNewEmployee(member);
         if (result) {
             AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "New Employee added", mName + " has been added");
+//            DatabaseHandler.getInstance().getBookGraphStatistics();
+//            DatabaseHandler.getInstance().getMemberGraphStatistics();
             clearEntries();
         } else {
             AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "Failed to add new Employee", "Check you entries and try again.");
@@ -102,8 +113,8 @@ public class EmployeeAddController implements Initializable {
 
     public void infalteUI(Member member) {
         name.setText(member.getName());
-        id.setText(member.getId());
-        id.setEditable(false);
+//        id.setText(member.getId());
+//        id.setEditable(false);
         mobile.setText(member.getMobile());
         email.setText(member.getEmail());
         password.setText(member.getPassword());
@@ -113,14 +124,14 @@ public class EmployeeAddController implements Initializable {
 
     private void clearEntries() {
         name.clear();
-        id.clear();
+//        id.clear();
         mobile.clear();
         email.clear();
         password.clear();
     }
 
     private void handleUpdateMember() {
-        Member member = new Member(id.getText(), name.getText(), mobile.getText(), email.getText());
+        Member member = new Member(name.getText(), mobile.getText(), email.getText());
         member.setPassword(DigestUtils.shaHex(password.getText()));
         if (DatabaseHandler.getInstance().updateEmployee(member)) {
             AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "Success", "Employee data updated.");

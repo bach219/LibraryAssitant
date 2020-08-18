@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXTextField?>
 <?import java.lang.String?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Menu?>
@@ -10,11 +11,11 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.StackPane?>
 
-<StackPane fx:id="rootPane" stylesheets="@../../../../resources/dark-theme.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="library.assistant.ui.issuedlist.IssuedListController">
+<StackPane fx:id="rootPane" prefHeight="548.0" prefWidth="1038.0" stylesheets="@../../../../resources/dark-theme.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="library.assistant.ui.issuedlist.IssuedListController">
    <children>
       <AnchorPane id="AnchorPane" fx:id="contentPane" prefHeight="546.0" prefWidth="789.0" stylesheets="@../../../../resources/dark-theme.css">
          <children>
-            <TableView fx:id="tableView" layoutX="10.0" layoutY="10.0" prefHeight="410.0" prefWidth="732.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+            <TableView fx:id="tableView" layoutX="10.0" layoutY="121.0" prefHeight="427.0" prefWidth="1038.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="121.0">
                <columns>
                   <TableColumn fx:id="idCol" maxWidth="100.0" minWidth="60.0" prefWidth="60.0" text="SI No" />
                   <TableColumn fx:id="bookIDCol" maxWidth="3000.0" prefWidth="60.0" text="Book ID" />
@@ -50,6 +51,7 @@
                   </Menu>
                </menus>
             </MenuBar>
+            <JFXTextField fx:id="search" alignment="CENTER" layoutX="141.0" layoutY="32.0" onKeyTyped="#handleSearch" prefHeight="59.0" prefWidth="757.0" promptText="Search Issued Book" />
          </children>
       </AnchorPane>
    </children>

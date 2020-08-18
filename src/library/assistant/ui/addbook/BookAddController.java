@@ -27,7 +27,7 @@ public class BookAddController implements Initializable {
     @FXML
     private JFXTextField title;
     @FXML
-    private JFXTextField id;
+    private JFXTextField price;
     @FXML
     private JFXTextField author;
     @FXML
@@ -44,20 +44,30 @@ public class BookAddController implements Initializable {
     private DatabaseHandler databaseHandler;
     private Boolean isInEditMode = Boolean.FALSE;
 
+    Double price1 = 0.0;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         databaseHandler = DatabaseHandler.getInstance();
     }
+    
+    
 
     @FXML
     private void addBook(ActionEvent event) {
-        String bookID = StringUtils.trimToEmpty(id.getText());
+        String bookPrice = StringUtils.trimToEmpty(price.getText());
         String bookAuthor = StringUtils.trimToEmpty(author.getText());
         String bookName = StringUtils.trimToEmpty(title.getText());
         String bookPublisher = StringUtils.trimToEmpty(publisher.getText());
 
-        if (bookID.isEmpty() || bookAuthor.isEmpty() || bookName.isEmpty()) {
+        if (bookPrice.isEmpty() || bookAuthor.isEmpty() || bookName.isEmpty() || bookPublisher.isEmpty()) {
             AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "Insufficient Data", "Please enter data in all fields.");
+            return;
+        }
+        
+        try {
+            price1 = Double.parseDouble(bookPrice);
+        } catch (NumberFormatException e) {
+            AlertMaker.showErrorMessage("Failed", "Failed to parse price");
             return;
         }
 
@@ -65,13 +75,13 @@ public class BookAddController implements Initializable {
             handleEditOperation();
             return;
         }
+//
+//        if (DataHelper.isBookExists(bookID)) {
+//            AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "Duplicate book id", "Book with same Book ID exists.\nPlease use new ID");
+//            return;
+//        }
 
-        if (DataHelper.isBookExists(bookID)) {
-            AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "Duplicate book id", "Book with same Book ID exists.\nPlease use new ID");
-            return;
-        }
-
-        Book book = new Book(bookID, bookName, bookAuthor, bookPublisher, Boolean.TRUE);
+        Book book = new Book(bookName, bookAuthor, bookPublisher, Boolean.TRUE, price1);
         System.out.println(book);
         boolean result = DataHelper.insertNewBook(book);
         if (result) {
@@ -103,22 +113,22 @@ public class BookAddController implements Initializable {
 
     public void inflateUI(Book book) {
         title.setText(book.getTitle());
-        id.setText(book.getId());
+//        id.setText(book.getId());
         author.setText(book.getAuthor());
         publisher.setText(book.getPublisher());
-        id.setEditable(false);
+        price.setEditable(false);
         isInEditMode = Boolean.TRUE;
     }
 
     private void clearEntries() {
         title.clear();
-        id.clear();
+        price.clear();
         author.clear();
         publisher.clear();
     }
 
     private void handleEditOperation() {
-        Book book = new Book(id.getText(), title.getText(), author.getText(), publisher.getText(), true);
+        Book book = new Book(title.getText(), author.getText(), publisher.getText(), true, price1);
         if (databaseHandler.updateBook(book)) {
             AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "Success", "Update complete");
         } else {

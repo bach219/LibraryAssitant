@@ -10,13 +10,14 @@ public class Book {
     private String author;
     private String publisher;
     private Boolean isAvail;
+    private double price;
 
-    public Book(String id, String title, String author, String publisher, Boolean isAvail) {
-        this.id = id;
+    public Book(String title, String author, String publisher, Boolean isAvail, double price) {
         this.title = title;
         this.author = author;
         this.publisher = publisher;
         this.isAvail = isAvail;
+        this.price = price;
     }
 
     
@@ -64,6 +65,19 @@ public class Book {
         this.isAvail = isAvail;
     }
 
+    public String getPrice() {
+        return price+"$";
+    }
+    
+    public double getBookPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    
     @Override
     public String toString() {
         return "Book{" + "id=" + id + ", title=" + title + ", author=" + author + ", publisher=" + publisher + ", isAvail=" + isAvail + '}';

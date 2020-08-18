@@ -24,6 +24,7 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.Menu;
@@ -39,6 +40,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import library.assistant.alert.AlertMaker;
 import library.assistant.database.DataHelper;
 import library.assistant.database.DatabaseHandler;
@@ -57,8 +59,8 @@ public class MainController implements Initializable, BookReturnCallback {
 
     private Boolean isReadyForSubmission = false;
     private DatabaseHandler databaseHandler;
-    private PieChart bookChart;
-    private PieChart memberChart;
+    public PieChart bookChart;
+    public PieChart memberChart;
 
     @FXML
     private HBox book_info;
@@ -129,8 +131,9 @@ public class MainController implements Initializable, BookReturnCallback {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        if(member.getPosition() != 1 && !"Admin".equals(member.getId()))
+        if (member.getPermission() != 1 && !"1".equals(member.getId())) {
             addEmployee.setVisible(false);
+        }
         databaseHandler = DatabaseHandler.getInstance();
         initDrawer();
         initGraphs();
@@ -253,8 +256,8 @@ public class MainController implements Initializable, BookReturnCallback {
                 button.setOnAction((actionEvent) -> {
                     bookIDInput.requestFocus();
                 });
-                AlertMaker.showMaterialDialog(rootPane, rootAnchorPane, Arrays.asList(button), "Book Issue Complete", null);
                 refreshGraphs();
+                AlertMaker.showMaterialDialog(rootPane, rootAnchorPane, Arrays.asList(button), "Book Issue Complete", null);
             } else {
                 JFXButton button = new JFXButton("Okay.I'll Check");
                 AlertMaker.showMaterialDialog(rootPane, rootAnchorPane, Arrays.asList(button), "Issue Operation Failed", null);
@@ -523,7 +526,7 @@ public class MainController implements Initializable, BookReturnCallback {
         });
     }
 
-    private void refreshGraphs() {
+    public void refreshGraphs() {
         bookChart.setData(databaseHandler.getBookGraphStatistics());
         memberChart.setData(databaseHandler.getMemberGraphStatistics());
     }

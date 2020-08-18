@@ -11,9 +11,18 @@ public class Member {
     private String mobile;
     private String password;
     private int position;
-
+//    private String permission;
+    
+//    public String permission =  position == 1 ? "Admin" : (position == 2 ? "Employee" : "Member"); 
+    
     public Member(String id, String name, String mobile, String email) {
         this.id = id;
+        this.name = name;
+        this.email = email;
+        this.mobile = mobile;
+    }
+    
+    public Member(String name, String mobile, String email) {
         this.name = name;
         this.email = email;
         this.mobile = mobile;
@@ -59,7 +68,7 @@ public class Member {
         this.password = password;
     }
 
-    public int getPosition() {
+    public int getPermission() {
         return position;
     }
 
@@ -67,6 +76,15 @@ public class Member {
         this.position = position;
     }
 
+//    public String getPermission() {
+//        return permission;
+//    }
+
+    public String getPosition() {
+        return this.position == 1 ? "Admin" : (position == 2 ? "Employee" : "Member");
+    }
+
+    
     @Override
     public String toString() {
         return "Member{" + "id=" + id + ", name=" + name + ", email=" + email + ", mobile=" + mobile + ", password=" + password + ", position=" + position + '}';

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXTextField?>
 <?import java.lang.String?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Menu?>
@@ -8,13 +9,14 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 
 <StackPane fx:id="rootPane" prefHeight="513.0" prefWidth="1014.0" stylesheets="@../../../../resources/dark-theme.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="library.assistant.ui.listmember.MemberListController">
     <children>
         <AnchorPane id="AnchorPane" fx:id="contentPane" prefHeight="456.0" prefWidth="722.0" stylesheets="@../../../../resources/dark-theme.css">
             <children>
-                <TableView fx:id="tableView" prefHeight="400.0" prefWidth="841.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="30.0">
+                <TableView fx:id="tableView" layoutY="127.0" prefHeight="386.0" prefWidth="1014.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="127.0">
                     <columns>
                         <TableColumn fx:id="nameCol" prefWidth="256.0" text="Name" />
                         <TableColumn fx:id="idCol" maxWidth="2800.0" prefWidth="206.0" text="Member ID" />
@@ -49,6 +51,11 @@
                         </Menu>
                     </menus>
                 </MenuBar>
+            <HBox layoutX="131.0" layoutY="32.0" prefHeight="64.0" prefWidth="738.0">
+               <children>
+                  <JFXTextField fx:id="search" alignment="CENTER" labelFloat="true" onKeyTyped="#handleSearch" prefHeight="63.0" prefWidth="741.0" promptText="Search Member" />
+               </children>
+            </HBox>
             </children>
         </AnchorPane>
     </children>

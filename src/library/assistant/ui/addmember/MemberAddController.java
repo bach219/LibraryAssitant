@@ -16,6 +16,7 @@ import library.assistant.alert.AlertMaker;
 import library.assistant.database.DataHelper;
 import library.assistant.database.DatabaseHandler;
 import library.assistant.data.model.Member;
+import library.assistant.util.LibraryAssistantUtil;
 import org.apache.commons.lang3.StringUtils;
 
 public class MemberAddController implements Initializable {
@@ -24,8 +25,8 @@ public class MemberAddController implements Initializable {
 
     @FXML
     private JFXTextField name;
-    @FXML
-    private JFXTextField id;
+//    @FXML
+//    private JFXTextField id;
     @FXML
     private JFXTextField mobile;
     @FXML
@@ -55,11 +56,11 @@ public class MemberAddController implements Initializable {
     @FXML
     private void addMember(ActionEvent event) {
         String mName = StringUtils.trimToEmpty(name.getText());
-        String mID = StringUtils.trimToEmpty(id.getText());
+//        String mID = StringUtils.trimToEmpty(id.getText());
         String mMobile = StringUtils.trimToEmpty(mobile.getText());
         String mEmail = StringUtils.trimToEmpty(email.getText());
 
-        Boolean flag = mName.isEmpty() || mID.isEmpty() || mMobile.isEmpty() || mEmail.isEmpty();
+        Boolean flag = mName.isEmpty() || mMobile.isEmpty() || mEmail.isEmpty();
         if (flag) {
             AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "Insufficient Data", "Please enter data in all fields.");
             return;
@@ -70,16 +71,24 @@ public class MemberAddController implements Initializable {
             return;
         }
 
-        if (DataHelper.isMemberExists(mID)) {
-            AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "Duplicate member id", "Member with same id exists.\nPlease use new ID");
+        Member member = DataHelper.getMemberByEmail(mEmail);
+        if (member != null) {
+            AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "Duplicate member email", "Member with same id exists.\nPlease use new Email");
             return;
         }
-
-        Member member = new Member(mID, mName, mMobile, mEmail);
+        
+//        if(LibraryAssistantUtil.validateEmailAddress(mEmail)){
+//            AlertMaker.showErrorMessage("Failed", "Failed to parse email format");
+//            return;
+//        }
+        
+        member = new Member(mName, mMobile, mEmail);
         member.setPosition(3);
         boolean result = DataHelper.insertNewMember(member);
         if (result) {
             AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "New member added", mName + " has been added");
+//            DatabaseHandler.getInstance().getBookGraphStatistics();
+//            DatabaseHandler.getInstance().getMemberGraphStatistics();
             clearEntries();
         } else {
             AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "Failed to add new member", "Check you entries and try again.");
@@ -88,8 +97,8 @@ public class MemberAddController implements Initializable {
 
     public void infalteUI(Member member) {
         name.setText(member.getName());
-        id.setText(member.getId());
-        id.setEditable(false);
+//        id.setText(member.getId());
+//        id.setEditable(false);
         mobile.setText(member.getMobile());
         email.setText(member.getEmail());
 
@@ -98,13 +107,13 @@ public class MemberAddController implements Initializable {
 
     private void clearEntries() {
         name.clear();
-        id.clear();
+//        id.clear();
         mobile.clear();
         email.clear();
     }
 
     private void handleUpdateMember() {
-        Member member = new Member(id.getText(), name.getText(), mobile.getText(), email.getText());
+        Member member = new Member( name.getText(), mobile.getText(), email.getText());
         if (DatabaseHandler.getInstance().updateMember(member)) {
             AlertMaker.showMaterialDialog(rootPane, mainContainer, new ArrayList<>(), "Success", "Member data updated.");
         } else {

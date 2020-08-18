@@ -106,6 +106,10 @@ public class SettingsController implements Initializable {
 
     @FXML
     private void handleTestMailAction(ActionEvent event) {
+//        if(LibraryAssistantUtil.validateEmailAddress(emailAddress.getText())){
+//            AlertMaker.showErrorMessage("Failed", "Failed to parse email format");
+//            return;
+//        }
         MailServerInfo mailServerInfo = readMailSererInfo();
         if (mailServerInfo != null) {
             TestMailController controller = (TestMailController) LibraryAssistantUtil.loadWindow(getClass().getResource("/library/assistant/ui/mail/test_mail.fxml"), "Test Email", null);
@@ -115,6 +119,10 @@ public class SettingsController implements Initializable {
 
     @FXML
     private void saveMailServerConfuration(ActionEvent event) {
+//        if(LibraryAssistantUtil.validateEmailAddress(emailAddress.getText())){
+//            AlertMaker.showErrorMessage("Failed", "Failed to parse email format");
+//            return;
+//        }
         MailServerInfo mailServerInfo = readMailSererInfo();
         if (mailServerInfo != null) {
             if (DataHelper.updateMailServerInfo(mailServerInfo)) {
@@ -181,7 +189,7 @@ public class SettingsController implements Initializable {
         }
 
         Member member = new Member(id.getText(), username.getText(), mobile.getText(), email.getText());
-        member.setPassword(DigestUtils.shaHex(password.getText()));
+        member.setPassword(DigestUtils.shaHex(pword));
         System.out.println(member);
         if (DatabaseHandler.getInstance().updateEmployee(member)) {
             AlertMaker.showErrorMessage("Success", "Employee data updated.");

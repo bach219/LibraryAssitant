@@ -143,7 +143,7 @@
                         </AnchorPane>
                     </content>
                 </Tab>
-                <Tab closable="false" styleClass="settings-tab" text="Export">
+<!--                <Tab closable="false" styleClass="settings-tab" text="Export">
                     <content>
                         <AnchorPane id="AnchorPane" prefHeight="304.0" prefWidth="402.0" styleClass="custom-pane">
                             <children>
@@ -152,7 +152,7 @@
                             </children>
                         </AnchorPane>
                     </content>
-                </Tab>
+                </Tab>-->
             
             </tabs>
         </TabPane>

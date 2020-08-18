@@ -11,9 +11,11 @@ import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
+import java.util.Optional;
 import javafx.scene.Node;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -28,6 +30,15 @@ import library.assistant.util.LibraryAssistantUtil;
 
 public class AlertMaker {
 
+    public static Optional<ButtonType> showQuestionDeleting(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        styleAlert(alert);
+        return alert.showAndWait();
+    }
+    
     public static void showSimpleAlert(String title, String content) {
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle(title);

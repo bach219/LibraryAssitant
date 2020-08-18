@@ -1,5 +1,6 @@
 package library.assistant.ui.issuedlist;
 
+import com.jfoenix.controls.JFXTextField;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,6 +19,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -55,11 +57,13 @@ public class IssuedListController implements Initializable {
     private StackPane rootPane;
     @FXML
     private AnchorPane contentPane;
+    @FXML
+    private JFXTextField search;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initCol();
-        loadData();
+        loadData("");
     }
 
     private void initCol() {
@@ -77,16 +81,16 @@ public class IssuedListController implements Initializable {
         this.callback = callback;
     }
 
-    private void loadData() {
+    private void loadData(String search) {
         list.clear();
         DatabaseHandler handler = DatabaseHandler.getInstance();
         String qu = "SELECT ISSUE.bookID, ISSUE.memberID, ISSUE.issueTime, MEMBER.name, BOOK.title FROM ISSUE\n"
                 + "LEFT OUTER JOIN MEMBER\n"
                 + "ON MEMBER.id = ISSUE.memberID\n"
                 + "LEFT OUTER JOIN BOOK\n"
-                + "ON BOOK.id = ISSUE.bookID";
+                + "ON BOOK.id = ISSUE.bookID WHERE CONCAT(ISSUE.bookID, ISSUE.memberID, ISSUE.issueTime, MEMBER.name, BOOK.title) like '%" + search + "%'";
         ResultSet rs = handler.execQuery(qu);
-        Preferences pref = Preferences.getPreferences();
+//        Preferences pref = Preferences.getPreferences();
         try {
             int counter = 0;
             while (rs.next()) {
@@ -108,7 +112,7 @@ public class IssuedListController implements Initializable {
 
     @FXML
     private void handleRefresh(ActionEvent event) {
-        loadData();
+        loadData("");
     }
 
     @FXML
@@ -145,6 +149,11 @@ public class IssuedListController implements Initializable {
         if (issueInfo != null) {
             callback.loadBookReturn(issueInfo.getBookID());
         }
+    }
+
+    @FXML
+    private void handleSearch(KeyEvent event) {
+        loadData(search.getText());
     }
 
 }

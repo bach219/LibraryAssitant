@@ -19,7 +19,7 @@
                         <Insets left="10.0" right="10.0" top="20.0" />
                      </VBox.margin>
                   </JFXTextField>
-                  <JFXTextField fx:id="id" labelFloat="true" layoutX="20.0" layoutY="30.0" promptText="Book ID">
+                  <JFXTextField fx:id="price" labelFloat="true" layoutX="20.0" layoutY="30.0" promptText="Book Price">
                      <VBox.margin>
                         <Insets left="10.0" right="10.0" top="20.0" />
                      </VBox.margin>

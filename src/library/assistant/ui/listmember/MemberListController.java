@@ -1,7 +1,9 @@
 package library.assistant.ui.listmember;
 
+import com.jfoenix.controls.JFXTextField;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -11,7 +13,6 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -25,6 +26,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -58,13 +60,14 @@ public class MemberListController implements Initializable {
     @FXML
     private AnchorPane contentPane;
     @FXML
-    private TableColumn<Member, Integer> positionCol;
+    private TableColumn<Member, String> positionCol;
+    @FXML
+    private JFXTextField search;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initCol();
-        loadData();
-
+        loadData("");
     }
 
     private void initCol() {
@@ -79,13 +82,13 @@ public class MemberListController implements Initializable {
         return (Stage) tableView.getScene().getWindow();
     }
 
-    private void loadData() {
+    private void loadData(String search) {
         list.clear();
 
-        DatabaseHandler handler = DatabaseHandler.getInstance();
-        String qu = "SELECT * FROM MEMBER";
-        ResultSet rs = handler.execQuery(qu);
         try {
+            String qu = "SELECT * FROM MEMBER WHERE CONCAT(id, name, mobile, email) like '%" + search + "%'";
+            PreparedStatement stmt = DatabaseHandler.getInstance().getConnection().prepareStatement(qu);
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 String name = rs.getString("name");
                 String mobile = rs.getString("mobile");
@@ -117,18 +120,16 @@ public class MemberListController implements Initializable {
             AlertMaker.showErrorMessage("Cant be deleted", "This member has some books.");
             return;
         }
-        if (LoginController.member.getPosition() >= selectedForDeletion.getPosition()) {
+        if (LoginController.member.getPermission() >= selectedForDeletion.getPermission()) {
             AlertMaker.showErrorMessage("Cant be deleted", "You dont't have permission to delete this employee.");
             return;
         }
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Deleting book");
-        alert.setContentText("Are you sure want to delete " + selectedForDeletion.getName() + " ?");
-        Optional<ButtonType> answer = alert.showAndWait();
+        String delete = LoginController.member.getPosition();
+        Optional<ButtonType> answer = AlertMaker.showQuestionDeleting("Deleting " + delete, "Are you sure want to delete " + selectedForDeletion.getName() + " ?");
         if (answer.get() == ButtonType.OK) {
             Boolean result = DatabaseHandler.getInstance().deleteMember(selectedForDeletion);
             if (result) {
-                AlertMaker.showSimpleAlert("Book deleted", selectedForDeletion.getName() + " was deleted successfully.");
+                AlertMaker.showSimpleAlert(delete + " deleted", selectedForDeletion.getName() + " was deleted successfully.");
                 list.remove(selectedForDeletion);
             } else {
                 AlertMaker.showSimpleAlert("Failed", selectedForDeletion.getName() + " could not be deleted");
@@ -140,11 +141,12 @@ public class MemberListController implements Initializable {
 
     @FXML
     private void handleRefresh(ActionEvent event) {
-        loadData();
+        loadData("");
     }
 
     @FXML
     private void handleMemberEdit(ActionEvent event) {
+        System.out.println(LoginController.member);
         Parent parent = null;
         Member selectedForEdit = tableView.getSelectionModel().getSelectedItem();
         if (selectedForEdit == null) {
@@ -153,7 +155,7 @@ public class MemberListController implements Initializable {
         }
         try {
             Stage stage = new Stage(StageStyle.DECORATED);
-            if (selectedForEdit.getPosition() == 3) {
+            if (selectedForEdit.getPermission() == 3) {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/library/assistant/ui/addmember/member_add.fxml"));
                 parent = loader.load();
 
@@ -161,7 +163,7 @@ public class MemberListController implements Initializable {
                 controller.infalteUI(selectedForEdit);
                 stage.setTitle("Edit Member");
             } else {
-                if (LoginController.member.getPosition() < selectedForEdit.getPosition()) {
+                if (LoginController.member.getPermission() < selectedForEdit.getPermission() || (LoginController.member.getPermission() == 1 && LoginController.member.getPermission() == selectedForEdit.getPermission())) {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/library/assistant/ui/addemployee/employee_add.fxml"));
                     parent = loader.load();
 
@@ -206,6 +208,11 @@ public class MemberListController implements Initializable {
     @FXML
     private void closeStage(ActionEvent event) {
         getStage().close();
+    }
+
+    @FXML
+    private void handleSearch(KeyEvent event) {
+        loadData(search.getText());
     }
 
 }

@@ -247,11 +247,11 @@
                                 <MenuItem mnemonicParsing="false" onAction="#handleMenuOverdueNotification" text="Overdue Notification" />
                             </items>
                         </Menu>
-                        <Menu mnemonicParsing="false" text="Help">
+<!--                        <Menu mnemonicParsing="false" text="Help">
                             <items>
                                 <MenuItem mnemonicParsing="false" onAction="#handleAboutMenu" text="About" />
                             </items>
-                        </Menu>
+                        </Menu>-->
                     </menus>
                 </MenuBar>
             </children>

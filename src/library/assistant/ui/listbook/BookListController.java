@@ -1,7 +1,9 @@
 package library.assistant.ui.listbook;
 
+import com.jfoenix.controls.JFXTextField;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -21,10 +23,10 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -33,6 +35,7 @@ import library.assistant.alert.AlertMaker;
 import library.assistant.data.model.Book;
 import library.assistant.database.DatabaseHandler;
 import library.assistant.ui.addbook.BookAddController;
+import library.assistant.ui.login.LoginController;
 import library.assistant.ui.main.MainController;
 import library.assistant.util.LibraryAssistantUtil;
 
@@ -56,11 +59,15 @@ public class BookListController implements Initializable {
     private TableColumn<Book, Boolean> availabilityCol;
     @FXML
     private AnchorPane contentPane;
+    @FXML
+    private JFXTextField search;
+    @FXML
+    private TableColumn<Book, Double> price;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initCol();
-        loadData();
+        loadData("");
     }
 
     private Stage getStage() {
@@ -73,23 +80,26 @@ public class BookListController implements Initializable {
         authorCol.setCellValueFactory(new PropertyValueFactory<>("author"));
         publisherCol.setCellValueFactory(new PropertyValueFactory<>("publisher"));
         availabilityCol.setCellValueFactory(new PropertyValueFactory<>("isAvail"));
+        price.setCellValueFactory(new PropertyValueFactory<>("price"));        
     }
 
-    private void loadData() {
+    private void loadData(String search) {
         list.clear();
-
-        DatabaseHandler handler = DatabaseHandler.getInstance();
-        String qu = "SELECT * FROM BOOK";
-        ResultSet rs = handler.execQuery(qu);
         try {
+            String checkstmt = "SELECT * FROM BOOK WHERE CONCAT(id, title, author, publisher, price) like '%" + search + "%'";
+            PreparedStatement stmt = DatabaseHandler.getInstance().getConnection().prepareStatement(checkstmt);
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 String titlex = rs.getString("title");
                 String author = rs.getString("author");
                 String id = rs.getString("id");
                 String publisher = rs.getString("publisher");
                 Boolean avail = rs.getBoolean("isAvail");
+                Double price1 = rs.getDouble("price");
 
-                list.add(new Book(id, titlex, author, publisher, avail));
+                Book b = new Book(titlex, author, publisher, avail, price1);
+                b.setId(id);
+                list.add(b);
 
             }
         } catch (SQLException ex) {
@@ -111,10 +121,7 @@ public class BookListController implements Initializable {
             AlertMaker.showErrorMessage("Cant be deleted", "This book is already issued and cant be deleted.");
             return;
         }
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Deleting book");
-        alert.setContentText("Are you sure want to delete the book " + selectedForDeletion.getTitle() + " ?");
-        Optional<ButtonType> answer = alert.showAndWait();
+        Optional<ButtonType> answer = AlertMaker.showQuestionDeleting("Deleting book", "Are you sure want to delete " + selectedForDeletion.getTitle() + " ?");
         if (answer.get() == ButtonType.OK) {
             Boolean result = DatabaseHandler.getInstance().deleteBook(selectedForDeletion);
             if (result) {
@@ -160,7 +167,7 @@ public class BookListController implements Initializable {
 
     @FXML
     private void handleRefresh(ActionEvent event) {
-        loadData();
+        loadData("");
     }
 
     @FXML
@@ -183,6 +190,11 @@ public class BookListController implements Initializable {
     @FXML
     private void closeStage(ActionEvent event) {
         getStage().close();
+    }
+
+    @FXML
+    private void handleSearch(KeyEvent event) {
+        loadData(search.getText());
     }
 
 }

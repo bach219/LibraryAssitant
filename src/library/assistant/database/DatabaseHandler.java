@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import library.assistant.data.model.Book;
+import library.assistant.data.model.MailServerInfo;
 import library.assistant.data.model.Member;
 import library.assistant.ui.addbook.BookAddController;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -35,7 +36,7 @@ public final class DatabaseHandler {
 
     private static DatabaseHandler handler = null;
 
-    private static final String DB_URL = "jdbc:derby:database;create=true";
+//    private static final String DB_URL = "jdbc:derby:database;create=true";
     private static Connection conn = null;
     private static Statement stmt = null;
 
@@ -47,14 +48,15 @@ public final class DatabaseHandler {
     public static void insertAdmin() {
         try {
             PreparedStatement statement = DatabaseHandler.getInstance().getConnection().prepareStatement(
-                    "INSERT INTO MEMBER(id,password,name,mobile,email,position) VALUES(?,?,?,?,?,?)");
-            statement.setString(1, "Admin");
-            statement.setString(2, DigestUtils.shaHex("admin"));
-            statement.setString(3, "Nguyễn Văn Bách");
-            statement.setString(4, "0333148314");
-            statement.setString(5, "nguyenvanbach579@gmail.com");
-            statement.setInt(6, 1);
+                    "INSERT INTO MEMBER(password,name,mobile,email,position) VALUES(?,?,?,?,?)");
+//            statement.setString(1, "Admin");
+            statement.setString(1, DigestUtils.shaHex("admin"));
+            statement.setString(2, "Nguyễn Văn Bách");
+            statement.setString(3, "0333148314");
+            statement.setString(4, "nguyenvanbach579@gmail.com");
+            statement.setInt(5, 1);
             statement.executeUpdate();
+            System.out.println("Add Admin Successfully");
         } catch (SQLException ex) {
             LOGGER.log(Level.ERROR, "{}", ex);
         }
@@ -71,51 +73,63 @@ public final class DatabaseHandler {
     }
 
     private static void inflateDB() {
-        List<String> tableData = new ArrayList<>();
-        try {
-            Set<String> loadedTables = getDBTables();
-            System.out.println("Already loaded tables " + loadedTables);
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(DatabaseHandler.class.getClass().getResourceAsStream("/resources/database/tables.xml"));
-            NodeList nList = doc.getElementsByTagName("table-entry");
-            for (int i = 0; i < nList.getLength(); i++) {
-                Node nNode = nList.item(i);
-                Element entry = (Element) nNode;
-                String tableName = entry.getAttribute("name");
-                String query = entry.getAttribute("col-data");
-                if (!loadedTables.contains(tableName.toLowerCase())) {
-                    tableData.add(String.format("CREATE TABLE %s (%s)", tableName, query));
-                }
+//        List<String> tableData = new ArrayList<>();
+//        try {
+//            Set<String> loadedTables = getDBTables();
+//            System.out.println("Already loaded tables " + loadedTables);
+//            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+//            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+//            Document doc = dBuilder.parse(DatabaseHandler.class.getClass().getResourceAsStream("/resources/database/tables.xml"));
+//            NodeList nList = doc.getElementsByTagName("table-entry");
+//            for (int i = 0; i < nList.getLength(); i++) {
+//                Node nNode = nList.item(i);
+//                Element entry = (Element) nNode;
+//                String tableName = entry.getAttribute("name");
+//                String query = entry.getAttribute("col-data");
+//                if (!loadedTables.contains(tableName.toLowerCase())) {
+//                    tableData.add(String.format("CREATE TABLE %s (%s)", tableName, query));
+//                }
+//            }
+//            if (tableData.isEmpty()) {
+//                System.out.println("Tables are already loaded");
+//            } else {
+//                System.out.println("Inflating new tables.");
+//                createTables(tableData);
+//                insertAdmin();
+//            }
+//        } catch (Exception ex) {
+//            LOGGER.log(Level.ERROR, "{}", ex);
+//        }
+
+          try {
+            String checkstmt = "SELECT count(*) FROM MEMBER";
+            PreparedStatement stmt = DatabaseHandler.getInstance().getConnection().prepareStatement(checkstmt);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                if(rs.getInt(1) == 0)
+                    insertAdmin();
             }
-            if (tableData.isEmpty()) {
-                System.out.println("Tables are already loaded");
-            } else {
-                System.out.println("Inflating new tables.");
-                createTables(tableData);
-                insertAdmin();
-            }
-        } catch (Exception ex) {
+        } catch (SQLException ex) {
             LOGGER.log(Level.ERROR, "{}", ex);
         }
     }
 
     private static void createConnection() {
         try {
-            Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
-            conn = DriverManager.getConnection(DB_URL);
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = (Connection) DriverManager.getConnection("jdbc:mysql://localhost/librarymanagement?useUnicode=true&characterEncoding=utf-8", "root", "");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Cant load database", "Database Error", JOptionPane.ERROR_MESSAGE);
             System.exit(0);
         }
     }
 
-    private static Set<String> getDBTables() throws SQLException {
-        Set<String> set = new HashSet<>();
-        DatabaseMetaData dbmeta = conn.getMetaData();
-        readDBTable(set, dbmeta, "TABLE", null);
-        return set;
-    }
+//    private static Set<String> getDBTables() throws SQLException {
+//        Set<String> set = new HashSet<>();
+//        DatabaseMetaData dbmeta = conn.getMetaData();
+//        readDBTable(set, dbmeta, "TABLE", null);
+//        return set;
+//    }
 
     private static void readDBTable(Set<String> set, DatabaseMetaData dbmeta, String searchCriteria, String schema) throws SQLException {
         ResultSet rs = dbmeta.getTables(null, schema, null, new String[]{searchCriteria});
@@ -216,12 +230,13 @@ public final class DatabaseHandler {
 
     public boolean updateBook(Book book) {
         try {
-            String update = "UPDATE BOOK SET TITLE=?, AUTHOR=?, PUBLISHER=? WHERE ID=?";
+            String update = "UPDATE BOOK SET TITLE=?, AUTHOR=?, PUBLISHER=?, PRICE = ? WHERE ID=?";
             PreparedStatement stmt = conn.prepareStatement(update);
             stmt.setString(1, book.getTitle());
             stmt.setString(2, book.getAuthor());
             stmt.setString(3, book.getPublisher());
-            stmt.setString(4, book.getId());
+            stmt.setDouble(4, book.getBookPrice());
+            stmt.setString(5, book.getId());
             int res = stmt.executeUpdate();
             return (res > 0);
         } catch (SQLException ex) {
@@ -263,19 +278,19 @@ public final class DatabaseHandler {
         return false;
     }
 
-    public Member loadLogin(String uname, String pass) {
+    public Member loadLogin(String email, String pass) {
         Member member = null;
         try {
-            String checkstmt = "SELECT * FROM MEMBER WHERE ID=? AND PASSWORD = ?";
+            String checkstmt = "SELECT * FROM MEMBER WHERE email=? AND PASSWORD = ?";
             PreparedStatement stmt = conn.prepareStatement(checkstmt);
-            stmt.setString(1, uname);
+            stmt.setString(1, email);
             stmt.setString(2, pass);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 String name = rs.getString("name");
                 String mobile = rs.getString("mobile");
                 String id = rs.getString("id");
-                String email = rs.getString("email");
+                String mail = rs.getString("email");
 
                 member = new Member(id, name, mobile, email);
                 member.setPassword(rs.getString("password"));
